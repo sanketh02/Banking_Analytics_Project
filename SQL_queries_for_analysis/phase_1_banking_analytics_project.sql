@@ -128,10 +128,6 @@ CREATE TABLE IF NOT EXISTS transactions (
 show tables;
 
 -- Load data from xle file to table
--- NOTE: Set this once to allow local file imports
-SET GLOBAL local_infile = 0;
-
-SET SESSION sql_mode = '';
 
 -- 1. Branches
 LOAD DATA INFILE "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\branches.xls"
@@ -142,15 +138,63 @@ IGNORE 1 ROWS
 (branch_id, branch_name, city, state, ifsc_code,
  contact_number, manager_name, opened_date);
 
-select * from branches;
+-- set local_infile = 1 if you are loading from local file 
+-- else set local_file = 0 if you are loading data from uploads file from sql server
+SHOW VARIABLES LIKE 'local_infile';
+SET GLOBAL local_infile = 0;
+SHOW VARIABLES LIKE 'secure_file_priv';
+-- since we are loading data from uploads folder 
+
+-- Customers
+LOAD DATA INFILE "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\customers.xls"
+REPLACE
+INTO TABLE customers
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
+-- Accounts
+LOAD DATA INFILE "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\accounts.xls"
+REPLACE
+INTO TABLE accounts
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWs;
+
+-- Loans
+LOAD DATA INFILE "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\loans.xls"
+REPLACE
+INTO TABLE loans
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWs;
+
+-- Transactions
+LOAD DATA INFILE "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\transactions.xls"
+REPLACE
+INTO TABLE transactions
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWs;
+
+-- verify if data is loaded or not 
+-- branches
+select * from branches limit 10;
+select count(*) from branches;
+select max(branch_id) from branches;
 
 -- customers
-LOAD DATA LOCAL INFILE "C:\\Users\\123\\Documents\\Data_Analytics_Project-main\\customers.xls"
-INTO TABLE customers
-FIELDS TERMINATED BY ','                     
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS ;
+select * from customers limit 10;
+select count(*) from customers;
+select max(customer_id) from customers;
 
-SHOW VARIABLES LIKE 'local_infile';
-SET GLOBAL local_infile = 1;
-SHOW VARIABLES LIKE 'secure_file_priv';
+-- quick check
+SELECT 'branches'    AS tables_1, COUNT(*) AS total_records FROM branches    UNION ALL
+SELECT 'customers',               COUNT(*)          FROM customers   UNION ALL
+SELECT 'accounts',                COUNT(*)          FROM accounts    UNION ALL
+SELECT 'loans',                   COUNT(*)          FROM loans       UNION ALL
+SELECT 'transactions',            COUNT(*)          FROM transactions;
